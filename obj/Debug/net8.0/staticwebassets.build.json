@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "32I2LqKB8V32qD6wgs/o+BKRsyi3m4Xaxvdwoj+qYvw=",
+  "Source": "SCUDocker",
+  "BasePath": "_content/SCUDocker",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
