@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "2d0S1LX8eyo=",
+  "dgSpecHash": "OOl52N3vLec=",
   "success": true,
   "projectFilePath": "C:\\Users\\USER\\Desktop\\SCUDocker\\SCUDocker.csproj",
   "expectedPackageFiles": [
@@ -46,6 +46,7 @@
     "C:\\Users\\USER\\.nuget\\packages\\system.diagnostics.diagnosticsource\\4.3.0\\system.diagnostics.diagnosticsource.4.3.0.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\system.diagnostics.tools\\4.3.0\\system.diagnostics.tools.4.3.0.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\system.diagnostics.tracing\\4.3.0\\system.diagnostics.tracing.4.3.0.nupkg.sha512",
+    "C:\\Users\\USER\\.nuget\\packages\\system.directoryservices\\9.0.3\\system.directoryservices.9.0.3.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\system.directoryservices.protocols\\9.0.3\\system.directoryservices.protocols.9.0.3.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\system.globalization\\4.3.0\\system.globalization.4.3.0.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\system.globalization.calendars\\4.3.0\\system.globalization.calendars.4.3.0.nupkg.sha512",

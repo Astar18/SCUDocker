@@ -67,6 +67,10 @@
               "target": "Package",
               "version": "[6.6.2, )"
             },
+            "System.DirectoryServices": {
+              "target": "Package",
+              "version": "[9.0.3, )"
+            },
             "System.DirectoryServices.Protocols": {
               "target": "Package",
               "version": "[9.0.3, )"

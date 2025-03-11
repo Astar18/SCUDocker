@@ -1,16 +1,104 @@
 ﻿using System.Net;
 using System.DirectoryServices.Protocols;
 using SCUDocker.APPLICATION.INTERFACES;
+using SCUDocker.DOMAIN.ENTITIES;
+using System.DirectoryServices;
 namespace SCUDocker.INFRASTRUCTURE.REPOSITORIES
 {
     public class UserRepository : IUserRepository
     {
         private readonly IConfiguration _configuration;
+        private readonly string _ldapPath;
+        private readonly string _adminUser;
+        private readonly string _adminPassword;
 
-        public UserRepository(IConfiguration configuration)
+
+        public UserRepository(string ldapPath, string adminUser, string adminPassword, IConfiguration configuration)
         {
             _configuration = configuration;
+            _ldapPath = ldapPath;
+            _adminUser = adminUser;
+            _adminPassword = adminPassword;
         }
+
+
+        //traer usuario
+        public List<string> GetAllUsers()
+{
+    List<string> users = new List<string>();
+
+    try
+    {
+        using (DirectoryEntry dirEntry = new DirectoryEntry(_ldapPath, _adminUser, _adminPassword))
+        {
+            using (DirectorySearcher searcher = new DirectorySearcher(dirEntry))
+            {
+                // Filtro para obtener todos los usuarios
+                searcher.Filter = "(&(objectClass=user)(objectCategory=person))";
+                searcher.SearchScope = System.DirectoryServices.SearchScope.Subtree;
+                searcher.PropertiesToLoad.Add("samAccountName"); // Cargar solo samAccountName
+
+                Console.WriteLine("Iniciando búsqueda...");
+                SearchResultCollection results = searcher.FindAll(); // Ejecutar búsqueda
+                Console.WriteLine($"Se encontraron {results.Count} resultados.");
+
+                foreach (SearchResult result in results)
+                {
+                    if (result.Properties["samAccountName"] != null)
+                    {
+                        // Agregar nombre de usuario encontrado a la lista
+                        string username = result.Properties["samAccountName"][0].ToString();
+                        Console.WriteLine($"Usuario encontrado: {username}");
+                        users.Add(username);
+                    }
+                }
+            }
+        }
+    }
+    catch (DirectoryServicesCOMException ex)
+    {
+        Console.WriteLine($"Error específico de LDAP: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error al obtener los usuarios: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    }
+
+    return users;
+}
+
+
+        //crear usuario
+        public void CreateUser(User user)
+{
+    try
+    {
+        using (DirectoryEntry dirEntry = new DirectoryEntry(_ldapPath, _adminUser, _adminPassword))
+        {
+            // Aquí estamos creando el usuario en la unidad organizativa (OU=Users), o en el contenedor por defecto (CN=Users)
+            string userDn = "CN=" + user.Username + ",CN=Users,DC=epn,DC=local"; // Si estás usando el contenedor de usuarios
+            using (DirectoryEntry newUser = dirEntry.Children.Add(userDn, "user"))
+            {
+                newUser.Properties["samAccountName"].Value = user.Username;
+                newUser.CommitChanges();
+
+                // Establecer la contraseña
+                newUser.Invoke("SetPassword", new object[] { user.Password });
+
+                // Activar la cuenta
+                newUser.Properties["userAccountControl"].Value = 0x200;
+                newUser.CommitChanges();
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error al crear el usuario: {ex.Message}");
+    }
+}
+
 
         // Método de autenticación de usuario con LDAP
         public bool Authenticate(string username, string password)
@@ -35,99 +123,21 @@ namespace SCUDocker.INFRASTRUCTURE.REPOSITORIES
             }
         }
 
-        // Obtener el email de un usuario
-        public string GetUserEmail(string username)
-        {
-            var ldapPath = _configuration["ActiveDirectory:LdapPath"];
-            var ldapPort = int.Parse(_configuration["ActiveDirectory:LdapPort"] ?? "389");  // Puerto LDAP por defecto  
-            var adminUser = _configuration["ActiveDirectory:Username"];
-            var adminPassword = _configuration["ActiveDirectory:Password"];
-
-            try
-            {
-                using (var connection = new LdapConnection(new LdapDirectoryIdentifier(ldapPath, ldapPort)))
-                {
-                    connection.AuthType = AuthType.Basic;
-                    connection.Bind(new NetworkCredential(adminUser, adminPassword));  // Bind con un usuario administrador
-
-                    var searchRequest = new SearchRequest(
-                        "DC=epn,DC=local", // Base DN
-                        $"(sAMAccountName={username})", // Filtro de búsqueda
-                        SearchScope.Subtree,
-                        new[] { "mail" } // Solo obtener el atributo de correo
-                    );
-
-                    var searchResponse = (SearchResponse)connection.SendRequest(searchRequest);
-
-                    if (searchResponse.Entries.Count > 0)
-                    {
-                        return searchResponse.Entries[0].Attributes["mail"]?.ToString() ?? "No Email Found";
-                    }
-
-                    return "User Not Found";
-                }
-            }
-            catch (Exception ex)
-            {
-                return $"Error: {ex.Message}";
-            }
-        }
-
-        // Obtener los roles (grupos) de un usuario
-        public List<string> GetUserRoles(string username)
-        {
-            var ldapPath = _configuration["ActiveDirectory:LdapPath"];
-            var ldapPort = int.Parse(_configuration["ActiveDirectory:LdapPort"] ?? "389");
-            var adminUser = _configuration["ActiveDirectory:Username"];
-            var adminPassword = _configuration["ActiveDirectory:Password"];
-            var userRoles = new List<string>();
-
-            try
-            {
-                using (var connection = new LdapConnection(new LdapDirectoryIdentifier(ldapPath, ldapPort)))
-                {
-                    connection.AuthType = AuthType.Basic;
-                    connection.Bind(new NetworkCredential(adminUser, adminPassword)); // Usar usuario administrador para búsquedas
-
-                    var searchRequest = new SearchRequest(
-                        "DC=epn,DC=local", // Base DN de la búsqueda
-                        $"(sAMAccountName={username})", // Filtro de búsqueda
-                        SearchScope.Subtree,
-                        new[] { "memberOf" } // Atributo de los grupos
-                    );
-
-                    var searchResponse = (SearchResponse)connection.SendRequest(searchRequest);
-
-                    foreach (SearchResultEntry entry in searchResponse.Entries)
-                    {
-                        var memberOf = entry.Attributes["memberOf"];
-                        if (memberOf != null)
-                        {
-                            foreach (var group in memberOf)
-                            {
-                                var groupName = group.ToString().Split(',')[0].Replace("CN=", "");
-                                userRoles.Add(groupName);
-                            }
-                        }
-                    }
-
-                    return userRoles.Count > 0 ? userRoles : new List<string> { "No Roles Found" };
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error inesperado al obtener roles: {ex.Message}");
-                return new List<string> { "Error inesperado al obtener roles" };
-            }
-        }
 
 
         public bool TestLdapConnection()
         {
             var ldapPath = _configuration["ActiveDirectory:LdapPath"];
-            var ldapPort = int.Parse(_configuration["ActiveDirectory:LdapPort"]);
             var username = _configuration["ActiveDirectory:Username"];
             var password = _configuration["ActiveDirectory:Password"];
+
+            // Validar y convertir el puerto
+            string ldapPortStr = _configuration["ActiveDirectory:LdapPort"];
+            if (!int.TryParse(ldapPortStr, out int ldapPort))
+            {
+                Console.WriteLine($"Error: LdapPort '{ldapPortStr}' no es un número válido.");
+                return false;
+            }
 
             try
             {
@@ -135,6 +145,7 @@ namespace SCUDocker.INFRASTRUCTURE.REPOSITORIES
                 {
                     connection.Bind(new NetworkCredential(username, password)); // Realizar bind con las credenciales
 
+                    Console.WriteLine("Conexión LDAP exitosa.");
                     return true;
                 }
             }
@@ -148,9 +159,8 @@ namespace SCUDocker.INFRASTRUCTURE.REPOSITORIES
                 Console.WriteLine($"Error inesperado: {ex.Message}");
                 return false;
             }
-
-            return false;
         }
+
 
 
     }

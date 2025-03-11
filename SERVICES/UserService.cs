@@ -1,5 +1,6 @@
 ﻿using SCUDocker.APPLICATION.DTOs;
 using SCUDocker.APPLICATION.INTERFACES;
+using SCUDocker.DOMAIN.ENTITIES;
 
 namespace SCUDocker.SERVICES
 {
@@ -17,8 +18,7 @@ namespace SCUDocker.SERVICES
             return new UserDto
             {
                 Username = username,
-                Email = _userRepository.GetUserEmail(username),
-                Roles = _userRepository.GetUserRoles(username)
+                
             };
         }
 
@@ -27,5 +27,22 @@ namespace SCUDocker.SERVICES
             // Implementación para obtener usuarios por grupo en Active Directory
             throw new NotImplementedException();
         }
+        public void RegisterUser(UserDto userDto)
+        {
+            var user = new User
+            {
+                Username = userDto.Username,
+                Password = userDto.Password
+                
+            };
+
+            _userRepository.CreateUser(user);
+        }
+        public List<string> GetAllUsers()
+        {
+            return _userRepository.GetAllUsers();
+        }
+
+
     }
 }

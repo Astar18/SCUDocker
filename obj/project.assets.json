@@ -594,6 +594,28 @@
           }
         }
       },
+      "System.DirectoryServices/9.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/System.DirectoryServices.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/System.DirectoryServices.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net8.0/System.DirectoryServices.dll": {
+            "assetType": "runtime",
+            "rid": "win"
+          }
+        }
+      },
       "System.DirectoryServices.Protocols/9.0.3": {
         "type": "package",
         "compile": {
@@ -2846,6 +2868,35 @@
         "ref/xamarinwatchos10/_._",
         "system.diagnostics.tracing.4.3.0.nupkg.sha512",
         "system.diagnostics.tracing.nuspec"
+      ]
+    },
+    "System.DirectoryServices/9.0.3": {
+      "sha512": "tghYc6d+7losoxDm+rr2mgaDvmJgfPyCe3qk+0ZNOgpTYwMnhDrYrX+IRB+BD90+yaPr2L6MQyrRCFpU578iuQ==",
+      "type": "package",
+      "path": "system.directoryservices/9.0.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/System.DirectoryServices.targets",
+        "lib/net462/_._",
+        "lib/net8.0/System.DirectoryServices.dll",
+        "lib/net8.0/System.DirectoryServices.xml",
+        "lib/net9.0/System.DirectoryServices.dll",
+        "lib/net9.0/System.DirectoryServices.xml",
+        "lib/netstandard2.0/System.DirectoryServices.dll",
+        "lib/netstandard2.0/System.DirectoryServices.xml",
+        "runtimes/win/lib/net8.0/System.DirectoryServices.dll",
+        "runtimes/win/lib/net8.0/System.DirectoryServices.xml",
+        "runtimes/win/lib/net9.0/System.DirectoryServices.dll",
+        "runtimes/win/lib/net9.0/System.DirectoryServices.xml",
+        "system.directoryservices.9.0.3.nupkg.sha512",
+        "system.directoryservices.nuspec",
+        "useSharedDesignerContext.txt"
       ]
     },
     "System.DirectoryServices.Protocols/9.0.3": {
@@ -5365,6 +5416,7 @@
       "Microsoft.AspNetCore.OpenApi >= 8.0.13",
       "Microsoft.VisualStudio.Azure.Containers.Tools.Targets >= 1.21.0",
       "Swashbuckle.AspNetCore >= 6.6.2",
+      "System.DirectoryServices >= 9.0.3",
       "System.DirectoryServices.Protocols >= 9.0.3"
     ]
   },
@@ -5434,6 +5486,10 @@
           "Swashbuckle.AspNetCore": {
             "target": "Package",
             "version": "[6.6.2, )"
+          },
+          "System.DirectoryServices": {
+            "target": "Package",
+            "version": "[9.0.3, )"
           },
           "System.DirectoryServices.Protocols": {
             "target": "Package",

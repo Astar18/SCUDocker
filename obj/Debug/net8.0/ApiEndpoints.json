@@ -1,1 +1,34 @@
-[]
+[
+  {
+    "ContainingType": "SCUDocker.API.CONTROLLERS.AuthenticationController",
+    "Method": "Login",
+    "RelativePath": "api/auth/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "SCUDocker.APPLICATION.DTOs.LoginRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SCUDocker.API.CONTROLLERS.LdapTestController",
+    "Method": "TestConnection",
+    "RelativePath": "api/LdapTest/TestConnection",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "SCUDocker.API.CONTROLLERS.LdapTestRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

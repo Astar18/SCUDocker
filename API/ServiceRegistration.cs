@@ -1,28 +1,39 @@
 ﻿using SCUDocker.APPLICATION.INTERFACES;
-using SCUDocker.INFRASTRUCTURE.CONFIGURATIONS;
 using SCUDocker.INFRASTRUCTURE.REPOSITORIES;
 using SCUDocker.SERVICES;
+using SCUDocker.INFRASTRUCTURE.CONFIGURATIONS;
+using Microsoft.Extensions.Configuration;
+using SCUDocker.INFRASTRUCTURE.SERVICES;
 
 namespace SCUDocker.API
 {
     public static class ServiceRegistration
     {
-        public static void AddApplicationServices(this IServiceCollection services)
+        public static void AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
-            // Configuración de Active Directory desde las variables de entorno
-            services.Configure<ActiveDirectorySettings>(options =>
+            // Registrar IUserRepository con valores de configuración leídos de las variables de entorno
+            services.AddScoped<IUserRepository>(provider =>
             {
-                options.Domain = Environment.GetEnvironmentVariable("ACTIVEDIRECTORY__DOMAIN") ?? string.Empty;
-                options.LdapPath = Environment.GetEnvironmentVariable("ACTIVEDIRECTORY__LDAPPATH") ?? string.Empty;
-                options.LdapPort = int.Parse(Environment.GetEnvironmentVariable("ACTIVEDIRECTORY__LDAPPORT") ?? "0");
-                options.Username = Environment.GetEnvironmentVariable("ACTIVEDIRECTORY__USERNAME") ?? string.Empty;
-                options.Password = Environment.GetEnvironmentVariable("ACTIVEDIRECTORY__PASSWORD") ?? string.Empty;
+                // Obtener los valores de configuración directamente
+                string ldapPath = configuration["ActiveDirectory:LdapPath"];
+                string adminUser = configuration["ActiveDirectory:Username"];
+                string adminPassword = configuration["ActiveDirectory:Password"];
+
+                if (string.IsNullOrEmpty(ldapPath) || string.IsNullOrEmpty(adminUser) || string.IsNullOrEmpty(adminPassword))
+                {
+                    throw new InvalidOperationException("La configuración de Active Directory no está correctamente configurada.");
+                }
+
+                // Crear UserRepository con los valores obtenidos y pasar IConfiguration
+                return new UserRepository(ldapPath, adminUser, adminPassword, configuration);
             });
 
-            // Inyección de dependencias
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IAuthService, AuthService>();
+            // Asegúrate de que UserService esté registrado correctamente con sus dependencias
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<LdapService>();
+
+            // Otros servicios
+            services.AddScoped<IAuthService, AuthService>();
         }
     }
 }

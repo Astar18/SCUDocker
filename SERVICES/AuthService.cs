@@ -20,8 +20,7 @@ namespace SCUDocker.SERVICES
             return new UserDto
             {
                 Username = username,
-                Email = _userRepository.GetUserEmail(username),
-                Roles = _userRepository.GetUserRoles(username)
+                
             };
         }
     }

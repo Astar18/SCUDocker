@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SCUDocker.APPLICATION.DTOs;
 using SCUDocker.APPLICATION.INTERFACES;
+using SCUDocker.SERVICES;
 
 namespace SCUDocker.API.CONTROLLERS
 {
@@ -8,11 +10,14 @@ namespace SCUDocker.API.CONTROLLERS
     public class LdapTestController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
+        private readonly IUserService _userService;
+
 
         // Usamos la interfaz IUserRepository en lugar de UserRepository
-        public LdapTestController(IUserRepository userRepository)
+        public LdapTestController(IUserRepository userRepository,IUserService  userService)
         {
             _userRepository = userRepository;
+            _userService = userService;
         }
 
         // Método POST para probar la conexión LDAP
@@ -35,7 +40,27 @@ namespace SCUDocker.API.CONTROLLERS
                 return BadRequest("Error al conectar con el servidor LDAP");
             }
         }
+        [HttpPost("register")]
+        public IActionResult Register(UserDto userDto)
+        {
+            _userService.RegisterUser(userDto);
+            return Ok("Usuario registrado exitosamente.");
+        }
+        [HttpGet("all-users")]
+        public ActionResult<List<string>> GetAllUsers()
+        {
+            var users = _userService.GetAllUsers();
+            if (users == null || users.Count == 0)
+            {
+                return NotFound("No se encontraron usuarios.");
+            }
+            return Ok(users);
+        }
+
+
+        
     }
+    
 
     // Clase de solicitud para los datos de prueba de conexión LDAP
     public class LdapTestRequest
