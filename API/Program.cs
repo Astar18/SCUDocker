@@ -17,12 +17,13 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configuraci�n del pipeline HTTP
+
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
-    options.RoutePrefix = string.Empty; // Esto hace que se abra Swagger autom�ticamente en la ra�z
+    options.ShowExtensions();
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "SCUDocker API v1");
+    options.RoutePrefix = string.Empty; 
 });
 
 app.UseAuthorization();

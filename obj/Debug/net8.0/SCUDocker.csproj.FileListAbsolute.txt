@@ -40,3 +40,4 @@ C:\Users\USER\Desktop\SCUDocker\bin\Debug\net8.0\System.DirectoryServices.Protoc
 C:\Users\USER\Desktop\SCUDocker\bin\Debug\net8.0\runtimes\linux\lib\net8.0\System.DirectoryServices.Protocols.dll
 C:\Users\USER\Desktop\SCUDocker\bin\Debug\net8.0\runtimes\osx\lib\net8.0\System.DirectoryServices.Protocols.dll
 C:\Users\USER\Desktop\SCUDocker\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.DirectoryServices.Protocols.dll
+C:\Users\USER\Desktop\SCUDocker\obj\Debug\net8.0\SCUDocker.sourcelink.json
