@@ -10,5 +10,6 @@ namespace SCUDocker.APPLICATION.INTERFACES
         void RegisterUser(UserDto userDto);
         List<UserDto> GetUsersByGroup(string groupName);
         List<string> GetAllUsers();
+        List<Dictionary<string, object>> GetUserProfiles();
     }
 }

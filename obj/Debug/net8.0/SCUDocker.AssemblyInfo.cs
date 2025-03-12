@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SCUDocker")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+18dc5b2f32c722c88de8b7932023484c1e568bc0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+227ecf8e6c529c2a4d4e1c1cda46721bdbadcbae")]
 [assembly: System.Reflection.AssemblyProductAttribute("SCUDocker")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SCUDocker")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

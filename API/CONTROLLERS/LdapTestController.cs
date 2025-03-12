@@ -56,6 +56,16 @@ namespace SCUDocker.API.CONTROLLERS
             }
             return Ok(users);
         }
+        [HttpGet("profiles")]
+        public IActionResult GetUserProfiles()
+        {
+            var profiles = _userService.GetUserProfiles();
+            if (profiles.Count == 0)
+            {
+                return NotFound("No se encontraron perfiles de usuario.");
+            }
+            return Ok(profiles);
+        }
 
 
         

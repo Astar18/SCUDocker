@@ -129,7 +129,6 @@ namespace SCUDocker.INFRASTRUCTURE.REPOSITORIES
 
 
 
-
         // Método de autenticación de usuario con LDAP
         public bool Authenticate(string username, string password)
         {

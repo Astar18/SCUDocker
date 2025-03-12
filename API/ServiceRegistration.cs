@@ -10,30 +10,29 @@ namespace SCUDocker.API
     public static class ServiceRegistration
     {
         public static void AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
-        {
-            // Registrar IUserRepository con valores de configuración leídos de las variables de entorno
-            services.AddScoped<IUserRepository>(provider =>
-            {
-                // Obtener los valores de configuración directamente
-                string ldapPath = configuration["ActiveDirectory:LdapPath"];
-                string adminUser = configuration["ActiveDirectory:Username"];
-                string adminPassword = configuration["ActiveDirectory:Password"];
+    {
+        // Obtener los valores de configuración directamente
+        string ldapServer = configuration["ActiveDirectory:LdapPath"] ?? throw new InvalidOperationException("LdapPath no está configurado.");
+        string adminUser = configuration["ActiveDirectory:Username"] ?? throw new InvalidOperationException("Username no está configurado.");
+        string adminPassword = configuration["ActiveDirectory:Password"] ?? throw new InvalidOperationException("Password no está configurado.");
 
-                if (string.IsNullOrEmpty(ldapPath) || string.IsNullOrEmpty(adminUser) || string.IsNullOrEmpty(adminPassword))
-                {
-                    throw new InvalidOperationException("La configuración de Active Directory no está correctamente configurada.");
-                }
+        // Registrar IUserRepository con las credenciales del .env
+        services.AddScoped<IUserRepository>(provider =>
+            new UserRepository(ldapServer, adminUser, adminPassword, configuration));
 
-                // Crear UserRepository con los valores obtenidos y pasar IConfiguration
-                return new UserRepository(ldapPath, adminUser, adminPassword, configuration);
-            });
+        // Registrar IUserService correctamente con sus dependencias
+        services.AddScoped<IUserService>(provider =>
+            new UserService(
+                provider.GetRequiredService<IUserRepository>(),
+                ldapServer,
+                adminUser,
+                adminPassword
+            ));
 
-            // Asegúrate de que UserService esté registrado correctamente con sus dependencias
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<LdapService>();
+        // Registrar otros servicios
+        services.AddScoped<LdapService>();
+        services.AddScoped<IAuthService, AuthService>();
+    }
 
-            // Otros servicios
-            services.AddScoped<IAuthService, AuthService>();
-        }
     }
 }
