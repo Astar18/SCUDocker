@@ -24,80 +24,110 @@ namespace SCUDocker.INFRASTRUCTURE.REPOSITORIES
 
         //traer usuario
         public List<string> GetAllUsers()
-{
-    List<string> users = new List<string>();
-
-    try
-    {
-        using (DirectoryEntry dirEntry = new DirectoryEntry(_ldapPath, _adminUser, _adminPassword))
         {
-            using (DirectorySearcher searcher = new DirectorySearcher(dirEntry))
+            List<string> users = new List<string>();
+
+            try
             {
-                // Filtro para obtener todos los usuarios
-                searcher.Filter = "(&(objectClass=user)(objectCategory=person))";
-                searcher.SearchScope = System.DirectoryServices.SearchScope.Subtree;
-                searcher.PropertiesToLoad.Add("samAccountName"); // Cargar solo samAccountName
-
-                Console.WriteLine("Iniciando búsqueda...");
-                SearchResultCollection results = searcher.FindAll(); // Ejecutar búsqueda
-                Console.WriteLine($"Se encontraron {results.Count} resultados.");
-
-                foreach (SearchResult result in results)
+                string ldapPathT = $"LDAP://{_ldapPath}";
+                using (DirectoryEntry dirEntry = new DirectoryEntry(ldapPathT, _adminUser, _adminPassword))
                 {
-                    if (result.Properties["samAccountName"] != null)
+                    using (DirectorySearcher searcher = new DirectorySearcher(dirEntry))
                     {
-                        // Agregar nombre de usuario encontrado a la lista
-                        string username = result.Properties["samAccountName"][0].ToString();
-                        Console.WriteLine($"Usuario encontrado: {username}");
-                        users.Add(username);
+                        // Filtro para obtener todos los usuarios
+                        searcher.Filter = "(&(objectClass=user)(objectCategory=person))";
+                        searcher.SearchScope = System.DirectoryServices.SearchScope.Subtree;
+                        searcher.PropertiesToLoad.Add("samAccountName"); // Cargar solo samAccountName
+
+                        Console.WriteLine("Iniciando búsqueda...");
+                        SearchResultCollection results = searcher.FindAll(); // Ejecutar búsqueda
+                        Console.WriteLine($"Se encontraron {results.Count} resultados.");
+
+                        foreach (SearchResult result in results)
+                        {
+                            if (result.Properties["samAccountName"] != null)
+                            {
+                                // Agregar nombre de usuario encontrado a la lista
+                                string username = result.Properties["samAccountName"][0].ToString();
+                                Console.WriteLine($"Usuario encontrado: {username}");
+                                users.Add(username);
+                            }
+                        }
                     }
                 }
             }
-        }
-    }
-    catch (DirectoryServicesCOMException ex)
-    {
-        Console.WriteLine($"Error específico de LDAP: {ex.Message}");
-        Console.WriteLine($"Stack trace: {ex.StackTrace}");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error al obtener los usuarios: {ex.Message}");
-        Console.WriteLine($"Stack trace: {ex.StackTrace}");
-    }
+            catch (DirectoryServicesCOMException ex)
+            {
+                Console.WriteLine($"Error específico de LDAP: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener los usuarios: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
 
-    return users;
-}
+            return users;
+        }
 
 
         //crear usuario
         public void CreateUser(User user)
-{
-    try
-    {
-        using (DirectoryEntry dirEntry = new DirectoryEntry(_ldapPath, _adminUser, _adminPassword))
         {
-            // Aquí estamos creando el usuario en la unidad organizativa (OU=Users), o en el contenedor por defecto (CN=Users)
-            string userDn = "CN=" + user.Username + ",CN=Users,DC=epn,DC=local"; // Si estás usando el contenedor de usuarios
-            using (DirectoryEntry newUser = dirEntry.Children.Add(userDn, "user"))
+            try
             {
-                newUser.Properties["samAccountName"].Value = user.Username;
-                newUser.CommitChanges();
+                // Formato LDAP correcto para conexión
+                string ldapPathT = $"LDAP://{_ldapPath}/CN=Users,DC=epn,DC=local";
 
-                // Establecer la contraseña
-                newUser.Invoke("SetPassword", new object[] { user.Password });
+                using (DirectoryEntry dirEntry = new DirectoryEntry(ldapPathT, _adminUser, _adminPassword))
+                {
+                    // Verificar si la ruta existe
+                    try
+                    {
+                        object obj = dirEntry.NativeObject;  // Intentar acceder a la ruta
+                        Console.WriteLine("La ruta 'CN=Users' es válida.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error al acceder a 'CN=Users': {ex.Message}");
+                        return;
+                    }
 
-                // Activar la cuenta
-                newUser.Properties["userAccountControl"].Value = 0x200;
-                newUser.CommitChanges();
+                    // Crear el usuario en la ruta correcta
+                    string userDn = $"CN={user.Username},CN=Users,DC=epn,DC=local";
+                    using (DirectoryEntry newUser = dirEntry.Children.Add(userDn, "user"))
+                    {
+                        newUser.Properties["samAccountName"].Value = user.Username;
+                        newUser.CommitChanges();
+
+                        // Establecer la contraseña
+                        newUser.Invoke("SetPassword", new object[] { user.Password });
+
+                        // Activar la cuenta
+                        newUser.Properties["userAccountControl"].Value = 0x200;  // Activa la cuenta
+                        newUser.CommitChanges();
+                    }
+                }
+            }
+            catch (DirectoryServicesCOMException comEx)
+            {
+                Console.WriteLine($"Error específico de LDAP: {comEx.Message}");
+                Console.WriteLine($"Stack trace: {comEx.StackTrace}");
+            }
+            catch (UnauthorizedAccessException authEx)
+            {
+                Console.WriteLine($"Error de autorización: {authEx.Message}");
+                Console.WriteLine($"Stack trace: {authEx.StackTrace}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al crear el usuario: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
             }
         }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error al crear el usuario: {ex.Message}");
-    }
-}
+
+
+
 
 
         // Método de autenticación de usuario con LDAP

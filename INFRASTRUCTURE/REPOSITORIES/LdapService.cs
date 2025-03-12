@@ -11,7 +11,7 @@ namespace SCUDocker.INFRASTRUCTURE.SERVICES
             try
             {
                 // Crear la conexión LDAP utilizando la URL del servidor
-                string ldapPath = $"LDAP://{ldapServer}"; // Usamos el prefijo LDAP:// para conectar con el servidor
+                string ldapPath = $"LDAP://{ldapServer}";  
                 DirectoryEntry entry = new DirectoryEntry(ldapPath, adminUser, adminPassword);
 
                 // Crear el objeto de búsqueda
